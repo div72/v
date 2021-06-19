@@ -3321,7 +3321,12 @@ fn (mut g Gen) expr(node ast.Expr) {
 			g.write('/*IsRefType*/ $is_ref_type')
 		}
 		ast.OffsetOf {
-			styp := g.typ(node.struct_type)
+			node_typ := g.unwrap_generic(node.struct_type)
+			sym := g.table.get_type_symbol(node_typ)
+			if sym.language == .v && sym.kind in [.placeholder, .any] {
+				g.error('unknown type `$sym.name`', node.pos)
+			}
+			styp := g.typ(node_typ)
 			g.write('/*OffsetOf*/ (u32)(__offsetof(${util.no_dots(styp)}, $node.field))')
 		}
 		ast.SqlExpr {

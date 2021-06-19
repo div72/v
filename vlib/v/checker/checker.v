@@ -6760,13 +6760,18 @@ pub fn (mut c Checker) chan_init(mut node ast.ChanInit) ast.Type {
 
 pub fn (mut c Checker) offset_of(node ast.OffsetOf) ast.Type {
 	sym := c.table.get_final_type_symbol(node.struct_type)
-	if sym.kind != .struct_ {
-		c.error('first argument of __offsetof must be struct', node.pos)
-		return ast.u32_type
+	match sym.kind {
+		.struct_ {
+			if !c.table.struct_has_field(sym, node.field) {
+				c.error('struct `$sym.name` has no field called `$node.field`', node.pos)
+			}
+		}
+		.any {}
+		else {
+			c.error('first argument of __offsetof must be struct', node.pos)
+		}
 	}
-	if !c.table.struct_has_field(sym, node.field) {
-		c.error('struct `$sym.name` has no field called `$node.field`', node.pos)
-	}
+	
 	return ast.u32_type
 }
 

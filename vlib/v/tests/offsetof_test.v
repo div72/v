@@ -41,3 +41,18 @@ fn test_offsetof_alias() {
 		assert *(&int(&byte(&fel) + __offsetof(Feline, age))) == 2147483647
 	}
 }
+
+fn get_breed<T>(obj T) string {
+	unsafe {
+		return *(&string(&byte(&obj) + __offsetof(T, breed)))
+	}
+}
+
+fn test_offsetof_generic() {
+	cat := Cat{
+		name: 'Cthulhu'
+		breed: 'Great Old One'
+		age: 2147483647
+	}
+	assert get_breed(cat) == 'Great Old One'
+}
